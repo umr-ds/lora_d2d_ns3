@@ -1,0 +1,9 @@
+version: "3"
+services:
+    iscram:
+        build:
+            context: .
+            dockerfile: Dockerfile
+
+        volumes:
+          - ./lora:/root/ns-allinone-3.31/ns-3.31/src/lora/
