@@ -37,12 +37,15 @@ RUN pip3 install cxxfilt
 
 WORKDIR /root
 
-ARG NS3_VERSION=3.31
+ARG NS3_VERSION=3.35
 
 # Fetch and install ns-3
 RUN wget http://www.nsnam.org/release/ns-allinone-$NS3_VERSION.tar.bz2 \
-    && tar -xf ns-allinone-$NS3_VERSION.tar.bz2 \
-    && cd ns-allinone-$NS3_VERSION \
+    && tar -xf ns-allinone-$NS3_VERSION.tar.bz2
+
+COPY ./lora /root/ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/src/lora/
+
+RUN cd ns-allinone-$NS3_VERSION \
     && ./build.py --disable-netanim --enable-examples --enable-tests --build-option -v \
     && cd ns-$NS3_VERSION \
     && ./waf install
@@ -51,10 +54,6 @@ RUN wget http://www.nsnam.org/release/ns-allinone-$NS3_VERSION.tar.bz2 \
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
 WORKDIR /root/ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/
-
-COPY ./lora /root/ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/src/lora/
-RUN ./waf install
-
 
 # Add the experiment stuff
 COPY entrypoint.sh /root/entrypoint.sh
