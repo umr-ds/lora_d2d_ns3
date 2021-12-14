@@ -45,110 +45,123 @@
 
 #include <iostream>
 #include <cmath>
+#include <random>
 
 using namespace ns3;
 
-/**
- * \brief Test script.
- *
- * This script 10 lora end-devices, one gateway. Lora end-devices send packets on three channels.
- *
- */
-class LoraExample
+NS_LOG_COMPONENT_DEFINE("ISCRAM");
+
+class ISCRAMD2D
 {
 public:
-    LoraExample();
-    /**
-     * \brief Configure script parameters
-     * \param argc is the command line argument count
-     * \param argv is the command line arguments
-     * \return true on successful configuration
-     */
+    ISCRAMD2D();
     bool Configure(int argc, char **argv);
-    /// Run simulation
     void Run();
-    /**
-     * Report results
-     * \param os the output stream
-     */
-    void Report(std::ostream &os);
+    bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender);
+    void SendPacket(Ptr<LoraNetDevice> dev, uint32_t mode);
+    Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan);
+    std::vector<std::tuple<int, int>> LocationDistribution();
+    bool Simulate();
 
 private:
     // parameters
     /// Number of nodes
-    uint32_t size;
-    /// Number of channels
-    double totalChannel;
-    /// Simulation time, seconds
+    uint32_t nodes;
+    /// Size of the field
+    uint32_t area;
+    /// Center frequency in Hz
+    uint32_t freq;
+    /// Bits per second
+    uint32_t bps;
+    /// Symbols per second
+    uint32_t sps;
+    /// Bandwidth in Hz
+    uint32_t bw;
+    /// Size of the payload in bytes
+    uint32_t p_size;
+    /// Total simulation time in seconds
     double totalTime;
+    /// How many packets a node should send
+    uint16_t messagesPerNode;
 
     ObjectFactory m_phyFac;
-    uint32_t m_bytesRx;
-
-private:
-    /// Create the nodes
-    Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan);
-    Ptr<LoraNetDevice> CreateGateway(Vector pos, Ptr<LoraChannel> chan);
-
-    bool DoExamples();
-
-    uint32_t DoOneExample(Ptr<LoraPropModel> prop);
-
-    bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender);
-    void SendOnePacket(Ptr<LoraNetDevice> dev, uint32_t mode);
+    uint32_t receivedBytes;
 };
 
 int main(int argc, char **argv)
 {
-    LoraExample test;
+    ISCRAMD2D test;
+
+    test.Configure(argc, argv);
 
     test.Run();
+
     return 0;
 }
 
-//-----------------------------------------------------------------------------
-LoraExample::LoraExample() : size(10),
-                             totalChannel(3),
-                             totalTime(100)
+ISCRAMD2D::ISCRAMD2D() : nodes(100),
+                         area(5),
+                         freq(433000),
+                         bps(50000),
+                         sps(61),
+                         bw(125),
+                         p_size(50),
+                         totalTime(120),
+                         messagesPerNode(3)
 {
 }
 
-bool LoraExample::Configure(int argc, char **argv)
+bool ISCRAMD2D::Configure(int argc, char **argv)
 {
     CommandLine cmd;
 
-    cmd.AddValue("size", "Number of nodes.", size);
-    cmd.AddValue("size", "Number of nodes.", totalChannel);
-    cmd.AddValue("time", "Simulation time, s.", totalTime);
+    cmd.AddValue("nodes", "Number of nodes.", nodes);
+    cmd.AddValue("area", "Size of the field", area);
+    cmd.AddValue("freq", "Center frequency in Hz", freq);
+    cmd.AddValue("bps", "Bits per second", bps);
+    cmd.AddValue("sps", "Symbols per second", sps);
+    cmd.AddValue("bw", "Bandwidth in Hz", bw);
+    cmd.AddValue("payload_size", "Size of the payload in bytes", p_size);
+    cmd.AddValue("sim_time", "Total simulation time", totalTime);
+    cmd.AddValue("msg", "How many messages a node should send", messagesPerNode);
 
     cmd.Parse(argc, argv);
     return true;
 }
 
-void LoraExample::Run()
+void ISCRAMD2D::Run()
 {
-    std::cout << "Starting simulation for " << totalTime << " s ...\n";
-    std::cout << "Creating " << size << " nodes ...\n";
-    std::cout << "Transmission on " << totalChannel << " channels ...\n";
+    // log all commandline arguments
+    std::cout << "nodes: " << nodes
+              << "; area: " << area
+              << "; freq: " << freq
+              << "; sps: " << sps
+              << "; bw: " << bw
+              << "; payload_size: " << p_size
+              << "; sim_time: " << totalTime
+              << "; msg: " << messagesPerNode
+              << std::endl;
 
-    DoExamples();
+    NS_LOG_DEBUG("Run");
+
+    Simulate();
 }
 
-bool LoraExample::RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
+bool ISCRAMD2D::RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
 {
-    m_bytesRx += pkt->GetSize();
+    receivedBytes += pkt->GetSize();
     std::cout << dev->GetAddress() << "; " << pkt->GetSize() << "; " << mode << ";" << sender << "\n";
     return true;
 }
 
-void LoraExample::SendOnePacket(Ptr<LoraNetDevice> dev, uint32_t mode)
+void ISCRAMD2D::SendPacket(Ptr<LoraNetDevice> dev, uint32_t mode)
 {
-    Ptr<Packet> pkt = Create<Packet>(13);
+    Ptr<Packet> pkt = Create<Packet>(this->p_size);
     dev->Send(pkt, dev->GetBroadcast(), mode);
 }
 
 Ptr<LoraNetDevice>
-LoraExample::CreateNode(Vector pos, Ptr<LoraChannel> chan)
+ISCRAMD2D::CreateNode(Vector pos, Ptr<LoraChannel> chan)
 {
     Ptr<LoraPhy> phy = m_phyFac.Create<LoraPhy>();
     Ptr<Node> node = CreateObject<Node>();
@@ -171,39 +184,34 @@ LoraExample::CreateNode(Vector pos, Ptr<LoraChannel> chan)
     return dev;
 }
 
-uint32_t
-LoraExample::DoOneExample(Ptr<LoraPropModel> prop)
+std::vector<std::tuple<int, int>> ISCRAMD2D::LocationDistribution()
 {
-    Ptr<LoraChannel> channel = CreateObject<LoraChannel>();
-    channel->SetAttribute("PropagationModel", PointerValue(prop));
+    std::vector<std::tuple<int, int>> positions = std::vector<std::tuple<int, int>>();
 
-    Ptr<LoraNetDevice> d1 = CreateNode(Vector(10, 10, 10), channel);
-    Ptr<LoraNetDevice> d2 = CreateNode(Vector(20, 20, 20), channel);
+    std::default_random_engine generator;
+    generator.seed(35039);
+    std::normal_distribution<double> distribution(area / 2, area / 3);
 
-    d2->SetReceiveCallback(MakeCallback(&LoraExample::RxPacket, this));
+    for (uint32_t i = 0; i < nodes; i++)
+    {
+        int x = (int)distribution(generator);
+        int y = (int)distribution(generator);
+        positions.push_back(std::make_tuple(x, y));
+    }
 
-    d1->SetChannelMode(0);
-    d1->SetTransmitStartTime(5);
-    Simulator::Schedule(Seconds(5), &LoraExample::SendOnePacket, this, d1, 0);
-
-    m_bytesRx = 0;
-    Simulator::Stop(Seconds(15.0));
-    Simulator::Run();
-    Simulator::Destroy();
-
-    return m_bytesRx;
+    return positions;
 }
 
-bool LoraExample::DoExamples()
+bool ISCRAMD2D::Simulate()
 {
 
     LoraModesList mList;
     LoraTxMode mode = LoraTxModeFactory::CreateMode(LoraTxMode::LORA,
-                                                    50000,  // Data rate in bps
-                                                    80,     // PHY rate in SPS -> TODO
-                                                    383000, // Center frequency 383 kHz
-                                                    125000, // Bandwidth 125 kHz
-                                                    2,      // Constellation -> TODO
+                                                    this->bps,  // this->bps,  // Data rate in bps
+                                                    this->sps,  // PHY rate in SPS
+                                                    this->freq, // Center frequency
+                                                    this->bw,   // Bandwidth
+                                                    0,          // Constellation -> Not used here
                                                     "TestMode");
     mList.AppendMode(LoraTxMode(mode));
 
@@ -216,10 +224,44 @@ bool LoraExample::DoExamples()
 
     Ptr<LoraPropModelThorp> prop = CreateObject<LoraPropModelThorp>();
 
-    uint32_t n_ReceivedPacket = DoOneExample(prop);
+    Ptr<LoraChannel> channel = CreateObject<LoraChannel>();
+    channel->SetAttribute("PropagationModel", PointerValue(prop));
 
-    std::cout << n_ReceivedPacket / 13 << " packets received, "
-              << (1 - (n_ReceivedPacket / 13) / (size)) * 100 << "\% packets loss.\n";
+    std::vector<std::tuple<int, int>> positions = LocationDistribution();
+
+    std::vector<Ptr<LoraNetDevice>> devices = std::vector<Ptr<LoraNetDevice>>();
+
+    for (std::tuple<int, int> position : positions)
+    {
+        Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel);
+        dev->SetReceiveCallback(MakeCallback(&ISCRAMD2D::RxPacket, this));
+        devices.push_back(dev);
+    }
+
+    std::random_device rd;
+    std::mt19937 rng(rd());
+    std::uniform_int_distribution<int> uni(0, totalTime * 1000);
+
+    // Every devices sends a packet after a random delay
+    for (Ptr<LoraNetDevice> dev : devices)
+    {
+        for (int i = 0; i < messagesPerNode; i++)
+        {
+            int scheduled_time = uni(rng);
+            float scheduled_time_s = (float)scheduled_time / 1000.0;
+            dev->SetChannelMode(0);
+            dev->SetTransmitStartTime(scheduled_time_s);
+            Simulator::Schedule(Seconds(scheduled_time_s), &ISCRAMD2D::SendPacket, this, dev, 0);
+        }
+    }
+
+    Simulator::Stop(Seconds(totalTime + 10));
+    Simulator::Run();
+    Simulator::Destroy();
+
+    std::cout << nodes * messagesPerNode << " packets transmitted, "
+              << receivedBytes / p_size << " packets received, "
+              << (1 - (receivedBytes / p_size) / (nodes * messagesPerNode)) * 100 << "\% packets loss.\n";
 
     return false;
 }
