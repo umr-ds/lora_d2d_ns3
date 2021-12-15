@@ -90,7 +90,6 @@ private:
     Ptr<NormalRandomVariable> randomAreaDistribution;
 
     ObjectFactory m_phyFac;
-    uint32_t receivedBytes;
 };
 
 int main(int argc, char **argv)
@@ -163,7 +162,8 @@ void ISCRAMD2D::Run()
 
 bool ISCRAMD2D::RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
 {
-    receivedBytes += pkt->GetSize();
+    uint32_t receivedBytes = pkt->GetSize();
+    std::cout << dev->GetAddress() << " received " << receivedBytes << " bytes from " << sender << std::endl;
     return true;
 }
 

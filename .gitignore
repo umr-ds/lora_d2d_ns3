@@ -100,3 +100,11 @@ Temporary Items
 !.vscode/*.code-snippets
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,visualstudiocode,c++
+
+
+### User Generated ###
+## exclude everything
+results/*
+
+# exception to the rule
+!results/.gitkeep

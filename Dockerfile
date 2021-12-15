@@ -31,7 +31,8 @@ RUN apt-get update \
     python3-pip \
     build-essential \
     qt5-default \
-    openjdk-17-jdk
+    openjdk-17-jdk \
+    parallel
 
 RUN pip3 install cxxfilt
 
