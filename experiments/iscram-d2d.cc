@@ -87,7 +87,7 @@ private:
     uint16_t seed;
 
     /// Random number generator
-    Ptr<NormalRandomVariable> randomNormal;
+    Ptr<NormalRandomVariable> randomAreaDistribution;
 
     ObjectFactory m_phyFac;
     uint32_t receivedBytes;
@@ -137,9 +137,11 @@ void ISCRAMD2D::Configure(int argc, char **argv)
 
     RngSeedManager::SetSeed(seed);
 
-    randomNormal = CreateObject<NormalRandomVariable>();
-    randomNormal->SetAttribute("Mean", DoubleValue(area / 2));
-    randomNormal->SetAttribute("Variance", DoubleValue(area / 3));
+    area = area * 1000;
+
+    randomAreaDistribution = CreateObject<NormalRandomVariable>();
+    randomAreaDistribution->SetAttribute("Mean", DoubleValue(area / 2));
+    randomAreaDistribution->SetAttribute("Variance", DoubleValue(area / 3));
 }
 
 void ISCRAMD2D::Run()
@@ -201,8 +203,9 @@ std::vector<std::tuple<int, int>> ISCRAMD2D::LocationDistribution()
 
     for (uint32_t i = 0; i < nodes; i++)
     {
-        int x = (int)randomNormal->GetValue();
-        int y = (int)randomNormal->GetValue();
+        int x = (int)randomAreaDistribution->GetValue();
+        int y = (int)randomAreaDistribution->GetValue();
+
         positions.push_back(std::make_tuple(x, y));
     }
 
