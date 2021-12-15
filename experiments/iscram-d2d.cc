@@ -49,19 +49,17 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("ISCRAM");
-
 class ISCRAMD2D
 {
 public:
     ISCRAMD2D();
-    bool Configure(int argc, char **argv);
+    void Configure(int argc, char **argv);
     void Run();
     bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender);
     void SendPacket(Ptr<LoraNetDevice> dev, uint32_t mode);
     Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan);
     std::vector<std::tuple<int, int>> LocationDistribution();
-    bool Simulate();
+    void Simulate();
 
 private:
     // parameters
@@ -83,6 +81,13 @@ private:
     double totalTime;
     /// How many packets a node should send
     uint16_t messagesPerNode;
+    /// Iterations per configuration
+    uint16_t iterations;
+    /// Seed for random number generator
+    uint16_t seed;
+
+    /// Random number generator
+    Ptr<NormalRandomVariable> randomNormal;
 
     ObjectFactory m_phyFac;
     uint32_t receivedBytes;
@@ -107,11 +112,13 @@ ISCRAMD2D::ISCRAMD2D() : nodes(100),
                          bw(125),
                          p_size(50),
                          totalTime(120),
-                         messagesPerNode(3)
+                         messagesPerNode(3),
+                         iterations(1),
+                         seed(35039)
 {
 }
 
-bool ISCRAMD2D::Configure(int argc, char **argv)
+void ISCRAMD2D::Configure(int argc, char **argv)
 {
     CommandLine cmd;
 
@@ -124,9 +131,15 @@ bool ISCRAMD2D::Configure(int argc, char **argv)
     cmd.AddValue("payload_size", "Size of the payload in bytes", p_size);
     cmd.AddValue("sim_time", "Total simulation time", totalTime);
     cmd.AddValue("msg", "How many messages a node should send", messagesPerNode);
+    cmd.AddValue("iter", "How often the given configuration should be executed", iterations);
 
     cmd.Parse(argc, argv);
-    return true;
+
+    RngSeedManager::SetSeed(seed);
+
+    randomNormal = CreateObject<NormalRandomVariable>();
+    randomNormal->SetAttribute("Mean", DoubleValue(area / 2));
+    randomNormal->SetAttribute("Variance", DoubleValue(area / 3));
 }
 
 void ISCRAMD2D::Run()
@@ -140,9 +153,8 @@ void ISCRAMD2D::Run()
               << "; payload_size: " << p_size
               << "; sim_time: " << totalTime
               << "; msg: " << messagesPerNode
+              << "; iter: " << iterations
               << std::endl;
-
-    NS_LOG_DEBUG("Run");
 
     Simulate();
 }
@@ -150,7 +162,6 @@ void ISCRAMD2D::Run()
 bool ISCRAMD2D::RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
 {
     receivedBytes += pkt->GetSize();
-    std::cout << dev->GetAddress() << "; " << pkt->GetSize() << "; " << mode << ";" << sender << "\n";
     return true;
 }
 
@@ -188,21 +199,17 @@ std::vector<std::tuple<int, int>> ISCRAMD2D::LocationDistribution()
 {
     std::vector<std::tuple<int, int>> positions = std::vector<std::tuple<int, int>>();
 
-    std::default_random_engine generator;
-    generator.seed(35039);
-    std::normal_distribution<double> distribution(area / 2, area / 3);
-
     for (uint32_t i = 0; i < nodes; i++)
     {
-        int x = (int)distribution(generator);
-        int y = (int)distribution(generator);
+        int x = (int)randomNormal->GetValue();
+        int y = (int)randomNormal->GetValue();
         positions.push_back(std::make_tuple(x, y));
     }
 
     return positions;
 }
 
-bool ISCRAMD2D::Simulate()
+void ISCRAMD2D::Simulate()
 {
 
     LoraModesList mList;
@@ -227,41 +234,42 @@ bool ISCRAMD2D::Simulate()
     Ptr<LoraChannel> channel = CreateObject<LoraChannel>();
     channel->SetAttribute("PropagationModel", PointerValue(prop));
 
-    std::vector<std::tuple<int, int>> positions = LocationDistribution();
-
-    std::vector<Ptr<LoraNetDevice>> devices = std::vector<Ptr<LoraNetDevice>>();
-
-    for (std::tuple<int, int> position : positions)
+    for (uint16_t iteration = 0; iteration < iterations; iteration++)
     {
-        Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel);
-        dev->SetReceiveCallback(MakeCallback(&ISCRAMD2D::RxPacket, this));
-        devices.push_back(dev);
-    }
 
-    std::random_device rd;
-    std::mt19937 rng(rd());
-    std::uniform_int_distribution<int> uni(0, totalTime * 1000);
+        uint16_t iterationSeed = seed + iteration;
+        RngSeedManager::SetRun(iterationSeed);
 
-    // Every devices sends a packet after a random delay
-    for (Ptr<LoraNetDevice> dev : devices)
-    {
-        for (int i = 0; i < messagesPerNode; i++)
+        std::vector<std::tuple<int, int>> positions = LocationDistribution();
+
+        std::vector<Ptr<LoraNetDevice>> devices = std::vector<Ptr<LoraNetDevice>>();
+
+        for (std::tuple<int, int> position : positions)
         {
-            int scheduled_time = uni(rng);
-            float scheduled_time_s = (float)scheduled_time / 1000.0;
-            dev->SetChannelMode(0);
-            dev->SetTransmitStartTime(scheduled_time_s);
-            Simulator::Schedule(Seconds(scheduled_time_s), &ISCRAMD2D::SendPacket, this, dev, 0);
+            Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel);
+            dev->SetReceiveCallback(MakeCallback(&ISCRAMD2D::RxPacket, this));
+            devices.push_back(dev);
         }
+
+        Ptr<UniformRandomVariable> simuTimeRandomRange = CreateObject<UniformRandomVariable>();
+        simuTimeRandomRange->SetAttribute("Min", DoubleValue(0.0));
+        simuTimeRandomRange->SetAttribute("Max", DoubleValue(totalTime));
+
+        // Every devices sends a packet after a random delay
+        for (Ptr<LoraNetDevice> dev : devices)
+        {
+            for (int i = 0; i < messagesPerNode; i++)
+            {
+                double scheduled_time = simuTimeRandomRange->GetValue();
+                dev->SetChannelMode(0);
+                dev->SetTransmitStartTime(scheduled_time);
+                Simulator::Schedule(Seconds(scheduled_time), &ISCRAMD2D::SendPacket, this, dev, 0);
+            }
+        }
+
+        Simulator::Stop(Seconds(totalTime + 10));
+        Simulator::Run();
     }
 
-    Simulator::Stop(Seconds(totalTime + 10));
-    Simulator::Run();
     Simulator::Destroy();
-
-    std::cout << nodes * messagesPerNode << " packets transmitted, "
-              << receivedBytes / p_size << " packets received, "
-              << (1 - (receivedBytes / p_size) / (nodes * messagesPerNode)) * 100 << "\% packets loss.\n";
-
-    return false;
 }
