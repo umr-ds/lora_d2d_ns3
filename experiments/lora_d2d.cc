@@ -40,12 +40,31 @@ uint16_t iterations;                             // Iterations per configuration
 uint16_t seed;                                   // Seed for random number generator
 Ptr<NormalRandomVariable> randomAreaDistributio; // Random number generator
 
-void LoRaD2DLog()
+void LoRaD2DLog(std::string event = "",
+                Address receiver = Address(),
+                double posX = 0,
+                double posY = 0,
+                uint32_t packetSize = 0,
+                uint64_t packetID = 0,
+                Address sender = Address())
 {
 
     std::ostringstream msg;
     msg << ns3::Now() << ","
         << std::time(nullptr) << ","
+        << event << ","
+
+        // RX Event
+        << receiver << ","
+        << posX << ","
+        << posY << ","
+        << packetSize << ","
+        << packetID << ","
+        << sender << ","
+
+        // TX Event
+
+        // Run config
         << nodes << ","
         << area << ","
         << freq << ","
@@ -54,8 +73,9 @@ void LoRaD2DLog()
         << payloadSize << ","
         << totalSimulationTime << ","
         << msgPerNode << ","
-        << iterations;
-        
+        << iterations << ","
+        << RngSeedManager::GetRun();
+
     NS_LOG_INFO(msg.str());
 }
 
@@ -98,9 +118,21 @@ void Configure(int argc, char **argv)
 
 bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
 {
-    // uint32_t receivedBytes =
-    pkt->GetSize();
-    // std::cout << dev->GetAddress() << " received " << receivedBytes << " bytes from " << sender << std::endl;
+
+    Ptr<MobilityModel> mobility = dev->GetNode()->GetObject<MobilityModel>();
+    double x = mobility->GetPosition().x;
+    double y = mobility->GetPosition().y;
+
+    uint32_t packetSize = pkt->GetSize();
+    uint64_t packetID = pkt->GetUid();
+
+    LoRaD2DLog("RX",
+               dev->GetAddress(),
+               x,
+               y,
+               packetSize,
+               packetID,
+               sender);
     return true;
 }
 
