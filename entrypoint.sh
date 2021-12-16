@@ -32,7 +32,7 @@ if [ -n "$RUN" ]; then
                                         --payload_size=${payload}
                                         --msg=${msg_per_node}
                                         --sim_time=${SIM_TIME}
-                                        --iter=${RUNS}\" > \"$log_path/$name.err\" 2>\"$log_path/$name.log\""
+                                        --iter=${RUNS}\" > \"$log_path/$name.err\" 2>\"$log_path/$name.csv\""
 
                                     sem -j+0 bash -c "'$cmd'"
 
