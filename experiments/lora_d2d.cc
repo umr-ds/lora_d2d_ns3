@@ -46,7 +46,8 @@ void LoRaD2DLog(std::string event = "",
                 double posY = 0,
                 uint32_t packetSize = 0,
                 uint64_t packetID = 0,
-                Address sender = Address())
+                Address sender = Address(),
+                bool sendSuccess = false)
 {
 
     std::ostringstream msg;
@@ -54,15 +55,14 @@ void LoRaD2DLog(std::string event = "",
         << std::time(nullptr) << ","
         << event << ","
 
-        // RX Event
+        // RX/TX Event
         << receiver << ","
         << posX << ","
         << posY << ","
         << packetSize << ","
         << packetID << ","
         << sender << ","
-
-        // TX Event
+        << sendSuccess << ","
 
         // Run config
         << nodes << ","
@@ -132,14 +132,31 @@ bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Ad
                y,
                packetSize,
                packetID,
-               sender);
+               sender,
+               false);
     return true;
 }
 
 void TxPacket(Ptr<LoraNetDevice> dev, uint32_t mode)
 {
     Ptr<Packet> pkt = Create<Packet>(payloadSize);
-    dev->Send(pkt, dev->GetBroadcast(), mode);
+    bool success = dev->Send(pkt, dev->GetBroadcast(), mode);
+
+    Ptr<MobilityModel> mobility = dev->GetNode()->GetObject<MobilityModel>();
+    double x = mobility->GetPosition().x;
+    double y = mobility->GetPosition().y;
+
+    uint32_t packetSize = pkt->GetSize();
+    uint64_t packetID = pkt->GetUid();
+
+    LoRaD2DLog("TX",
+               Address(),
+               x,
+               y,
+               packetSize,
+               packetID,
+               dev->GetAddress(),
+               success);
 }
 
 std::vector<std::tuple<int, int>> LocationDistribution()
@@ -251,7 +268,26 @@ int main(int argc, char **argv)
 {
     Configure(argc, argv);
 
-    LoRaD2DLog();
+    NS_LOG_INFO("Simulation Time,"
+                << "Unix Time,"
+                << "Event,"
+                << "Receiver Address,"
+                << "X Coordinate,"
+                << "Y Coordinate,"
+                << "Packet Size,"
+                << "Packet ID,"
+                << "Sender Address,"
+                << "Send Success State,"
+                << "Nodes,"
+                << "Area,"
+                << "Frequency,"
+                << "Symbols per Second,"
+                << "Bandwidth,"
+                << "Payload Size,"
+                << "Total Simulation Time,"
+                << "Messages per Node,"
+                << "Runs,"
+                << "Current Seed");
 
     Simulate();
 
