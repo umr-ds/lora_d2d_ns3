@@ -1,5 +1,5 @@
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
-    obj = bld.create_ns3_program('iscram-d2d', ['internet', 'mobility', 'stats', 'applications', 'lora'])
-    obj.source = 'iscram-d2d.cc'
+    obj = bld.create_ns3_program('lora_d2d', ['internet', 'mobility', 'stats', 'applications', 'lora'])
+    obj.source = 'lora_d2d.cc'

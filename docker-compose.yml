@@ -1,6 +1,6 @@
 version: "3"
 services:
-    iscram:
+    lora_d2d:
         build:
             context: .
             dockerfile: Dockerfile
@@ -8,7 +8,7 @@ services:
         volumes:
           - ./results:/results
           - ./lora:/root/ns-allinone-3.31/ns-3.31/src/lora/
-          - ./experiments:/root/ns-allinone-3.35/ns-3.35/scratch/iscram_d2d/
+          - ./experiments:/root/ns-allinone-3.35/ns-3.35/scratch/lora_d2d/
           - ./experiments:/root/ns-allinone-3.35/ns-3.35/experiments
         environment:
           - RUN

@@ -22,7 +22,7 @@ if [ -n "$RUN" ]; then
                                     name="${nodes}_${area}_${freq}_${bps}_${sps}_${bw}_${payload}_${msg_per_node}"
 
                                     echo "# Starting $name"
-                                    cmd="./waf --run=\"iscram_d2d
+                                    cmd="./waf --run=\"lora_d2d
                                         --nodes=${nodes}
                                         --area=${area}
                                         --freq=${freq}
