@@ -12,3 +12,4 @@ services:
           - ./experiments:/root/ns-allinone-3.35/ns-3.35/experiments
         environment:
           - RUN
+          - LOG_PATH
