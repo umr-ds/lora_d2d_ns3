@@ -42,8 +42,6 @@ Ptr<NormalRandomVariable> randomAreaDistributio; // Random number generator
 
 void LoRaD2DLog(std::string event = "",
                 Address receiver = Address(),
-                double posX = 0,
-                double posY = 0,
                 uint32_t packetSize = 0,
                 uint64_t packetID = 0,
                 Address sender = Address(),
@@ -52,28 +50,15 @@ void LoRaD2DLog(std::string event = "",
 
     std::ostringstream msg;
     msg << ns3::Now() << ","
-        << std::time(nullptr) << ","
         << event << ","
 
         // RX/TX Event
         << receiver << ","
-        << posX << ","
-        << posY << ","
         << packetSize << ","
         << packetID << ","
         << sender << ","
         << sendSuccess << ","
 
-        // Run config
-        << nodes << ","
-        << area << ","
-        << freq << ","
-        << sps << ","
-        << bw << ","
-        << payloadSize << ","
-        << totalSimulationTime << ","
-        << msgPerNode << ","
-        << iterations << ","
         << RngSeedManager::GetRun();
 
     NS_LOG_INFO(msg.str());
@@ -118,22 +103,16 @@ void Configure(int argc, char **argv)
 
 bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
 {
-
-    Ptr<MobilityModel> mobility = dev->GetNode()->GetObject<MobilityModel>();
-    double x = mobility->GetPosition().x;
-    double y = mobility->GetPosition().y;
-
     uint32_t packetSize = pkt->GetSize();
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("RX",
                dev->GetAddress(),
-               x,
-               y,
                packetSize,
                packetID,
                sender,
                false);
+
     return true;
 }
 
@@ -142,17 +121,11 @@ void TxPacket(Ptr<LoraNetDevice> dev, uint32_t mode)
     Ptr<Packet> pkt = Create<Packet>(payloadSize);
     bool success = dev->Send(pkt, dev->GetBroadcast(), mode);
 
-    Ptr<MobilityModel> mobility = dev->GetNode()->GetObject<MobilityModel>();
-    double x = mobility->GetPosition().x;
-    double y = mobility->GetPosition().y;
-
     uint32_t packetSize = pkt->GetSize();
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("TX",
                Address(),
-               x,
-               y,
                packetSize,
                packetID,
                dev->GetAddress(),
@@ -193,6 +166,14 @@ Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan, ObjectFactory p
     dev->SetChannel(chan);
     dev->SetTransducer(trans);
     node->AddDevice(dev);
+
+    std::ostringstream msg;
+    msg << "Position: X="
+        << pos.x << ", Y="
+        << pos.y << ", Address="
+        << dev->GetAddress();
+
+    NS_LOG_INFO(msg.str());
 
     return dev;
 }
@@ -269,24 +250,12 @@ int main(int argc, char **argv)
     Configure(argc, argv);
 
     NS_LOG_INFO("Simulation Time,"
-                << "Unix Time,"
                 << "Event,"
                 << "Receiver Address,"
-                << "X Coordinate,"
-                << "Y Coordinate,"
                 << "Packet Size,"
                 << "Packet ID,"
                 << "Sender Address,"
                 << "Send Success State,"
-                << "Nodes,"
-                << "Area,"
-                << "Frequency,"
-                << "Symbols per Second,"
-                << "Bandwidth,"
-                << "Payload Size,"
-                << "Total Simulation Time,"
-                << "Messages per Node,"
-                << "Runs,"
                 << "Current Seed");
 
     Simulate();
