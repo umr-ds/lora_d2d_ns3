@@ -36,7 +36,6 @@ uint32_t bw;                                     // Bandwidth in Hz
 uint32_t payloadSize;                            // Size of the payload in bytes
 double totalSimulationTime;                      // Total simulation time in seconds
 uint16_t msgPerNode;                             // How many packets a node should send
-uint16_t iterations;                             // Iterations per configuration
 uint16_t seed;                                   // Seed for random number generator
 Ptr<NormalRandomVariable> randomAreaDistributio; // Random number generator
 
@@ -78,7 +77,6 @@ void Configure(int argc, char **argv)
     payloadSize = 50;
     totalSimulationTime = 120.0;
     msgPerNode = 3;
-    iterations = 1;
     seed = 35039;
 
     CommandLine cmd;
@@ -91,14 +89,14 @@ void Configure(int argc, char **argv)
     cmd.AddValue("payload_size", "Size of the payload in bytes", payloadSize);
     cmd.AddValue("sim_time", "Total simulation time", totalSimulationTime);
     cmd.AddValue("msg", "How many messages a node should send", msgPerNode);
-    cmd.AddValue("iter", "How often the given configuration should be executed", iterations);
+    cmd.AddValue("seed", "The seed for initializing the RNG", seed);
     cmd.Parse(argc, argv);
 
     RngSeedManager::SetSeed(seed);
 
     randomAreaDistributio = CreateObject<NormalRandomVariable>();
     randomAreaDistributio->SetAttribute("Mean", DoubleValue(area / 2));
-    randomAreaDistributio->SetAttribute("Variance", DoubleValue(area / 3));
+    randomAreaDistributio->SetAttribute("Variance", DoubleValue(20 * area));
 }
 
 bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
@@ -205,44 +203,39 @@ void Simulate()
     Ptr<LoraChannel> channel = CreateObject<LoraChannel>();
     channel->SetAttribute("PropagationModel", PointerValue(prop));
 
-    for (uint16_t iteration = 0; iteration < iterations; iteration++)
+    RngSeedManager::SetRun(seed);
+
+    std::vector<std::tuple<int, int>> positions = LocationDistribution();
+
+    std::vector<Ptr<LoraNetDevice>> devices = std::vector<Ptr<LoraNetDevice>>();
+
+    for (std::tuple<int, int> position : positions)
     {
-
-        uint16_t iterationSeed = seed + iteration;
-        RngSeedManager::SetRun(iterationSeed);
-
-        std::vector<std::tuple<int, int>> positions = LocationDistribution();
-
-        std::vector<Ptr<LoraNetDevice>> devices = std::vector<Ptr<LoraNetDevice>>();
-
-        for (std::tuple<int, int> position : positions)
-        {
-            Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel, phyFac);
-            dev->SetReceiveCallback(MakeCallback(&RxPacket));
-            devices.push_back(dev);
-        }
-
-        Ptr<UniformRandomVariable> simuTimeRandomRange = CreateObject<UniformRandomVariable>();
-        simuTimeRandomRange->SetAttribute("Min", DoubleValue(0.0));
-        simuTimeRandomRange->SetAttribute("Max", DoubleValue(totalSimulationTime));
-
-        // Every devices sends a packet after a random delay
-        for (Ptr<LoraNetDevice> dev : devices)
-        {
-            for (int i = 0; i < msgPerNode; i++)
-            {
-                double scheduledTime = simuTimeRandomRange->GetValue();
-                dev->SetChannelMode(0);
-                dev->SetTransmitStartTime(scheduledTime);
-                Simulator::Schedule(Seconds(scheduledTime), &TxPacket, dev, 0);
-            }
-        }
-
-        Simulator::Stop(Seconds(totalSimulationTime + 10));
-        Simulator::Run();
+        Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel, phyFac);
+        dev->SetReceiveCallback(MakeCallback(&RxPacket));
+        devices.push_back(dev);
     }
 
+    Ptr<UniformRandomVariable> simuTimeRandomRange = CreateObject<UniformRandomVariable>();
+    simuTimeRandomRange->SetAttribute("Min", DoubleValue(0.0));
+    simuTimeRandomRange->SetAttribute("Max", DoubleValue(totalSimulationTime));
+
+    // Every devices sends a packet after a random delay
+    for (Ptr<LoraNetDevice> dev : devices)
+    {
+        for (int i = 0; i < msgPerNode; i++)
+        {
+            double scheduledTime = simuTimeRandomRange->GetValue();
+            dev->SetChannelMode(0);
+            dev->SetTransmitStartTime(scheduledTime);
+            Simulator::Schedule(Seconds(scheduledTime), &TxPacket, dev, 0);
+        }
+    }
+
+    Simulator::Stop(Seconds(totalSimulationTime + 10));
+    Simulator::Run();
     Simulator::Destroy();
+
 }
 
 int main(int argc, char **argv)
