@@ -13,3 +13,19 @@ services:
         environment:
           - RUN
           - LOG_PATH
+    jupyter:
+        image: jupyter/datascience-notebook:latest
+        container_name: lora_d2d_jupyter
+        ports:
+            - "8888:8888"
+        volumes:
+            - ./eval/:/home/docker_user/work/eval
+            - ./results/:/home/docker_user/work/results
+        environment:
+            JUPYTER_ENABLE_LAB: "yes"
+            JUPYTER_TOKEN: "lora_d2d"
+            NB_USER: docker_user
+            NB_UID: 2016
+            NB_GID: 2001
+            CHOWN_HOME: 'yes'
+            CHOWN_HOME_OPTS: -R
