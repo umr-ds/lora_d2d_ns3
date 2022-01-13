@@ -2,11 +2,12 @@ import glob
 import os
 
 import pandas as pd
+import numpy as np
 
 def get_positions(path, seed):
     print("Getting positions")
     position_lines = []
-    positions = pd.DataFrame()
+    positions = {}
     
     with open(path, 'r') as log:
         for lnumber, line in enumerate(log):
@@ -19,16 +20,9 @@ def get_positions(path, seed):
             x_val = x.split('=')[1].strip(',')
             y_val = y.split('=')[1].strip(',')
             addr_val = addr.split('=')[1].strip()
-
-            tmp_df = {
-                "X": x_val,
-                "Y": y_val,
-                "Address": addr_val,
-                "Seed": seed
-            }
-
-            positions = positions.append(tmp_df, ignore_index=True)
-                
+            
+            positions[addr_val] = (int(x_val), int(y_val))
+          
     return positions, position_lines
 
 def load_file(path):
@@ -44,21 +38,38 @@ def load_file(path):
     
     df = pd.read_csv(path, skiprows=position_lines)
     
-    df["Nodes"]         = positions["Nodes"]         = int(nodes)
-    df["Area"]          = positions["Area"]          = int(area)
-    df["Frequency"]     = positions["Frequency"]     = int(freq)
-    df["Bits/s"]        = positions["Bits/s"]        = int(bps)
-    df["Symbols/s"]     = positions["Symbols/s"]     = int(sps)
-    df["Bandwidth"]     = positions["Symbols/s"]     = int(bw)
-    df["Payload"]       = positions["Payload"]       = int(payload)
-    df["Messages/Node"] = positions["Messages/Node"] = int(msg_per_node)
-    df["Seed"]          = positions["Seed"]          = int(seed)
+    df["Nodes"]         = int(nodes)
+    df["Area"]          = int(area)
+    df["Frequency"]     = int(freq)
+    df["Bits/s"]        = int(bps)
+    df["Symbols/s"]     = int(sps)
+    df["Bandwidth"]     = int(bw)
+    df["Payload"]       = int(payload)
+    df["Messages/Node"] = int(msg_per_node)
+    df["Seed"]          = int(seed)
     
     df.loc[(df["Symbols/s"] == 61) & (df["Bits/s"] == 292) & (df["Payload"] == 50), "Mode"] = "SF12/125kHz/50B"
     df.loc[(df["Symbols/s"] == 977) & (df["Bits/s"] == 5468) & (df["Payload"] == 240), "Mode"] = "SF7/125kHz/240B"
     df.loc[(df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 240), "Mode"] = "SF7/250kHz/240B"
     
-    return df, positions
+    x_pos_sender = []
+    y_pos_sender = []
+    x_pos_receiver = []
+    y_pos_receiver = []
+    for _, data in df.iterrows():
+        xpos, ypos = positions[data["Sender Address"]]
+        x_pos_sender.append(xpos)
+        y_pos_sender.append(ypos)
+        xpos, ypos = positions.get(data["Receiver Address"], (np.NaN, np.NaN))
+        x_pos_receiver.append(xpos)
+        y_pos_receiver.append(ypos)
+        
+    df["Sender Position X"] = x_pos_sender
+    df["Sender Position Y"] = y_pos_sender
+    df["Receiver Position X"] = x_pos_receiver
+    df["Receiver Position Y"] = y_pos_receiver
+        
+    return df
     
 def load_data(path, param_filter={}):
     nodes = area = freq = bps = sps = bw = payload = msg_per_node = None
@@ -100,20 +111,17 @@ def load_data(path, param_filter={}):
           
     all_files = glob.glob(f"{path}{filter_str}.log")
 
-    _dfs = [load_file(p) for p in all_files]
-    
-    dfs = [df[0] for df in _dfs]
-    pos = [df[1] for df in _dfs]
+    dfs = [load_file(p) for p in all_files]
     
     print("Building giganonormous df")
     df = pd.concat(dfs)
-    positions = pd.concat(pos)
     
-    print("Pickling")
-    df.to_pickle(f"{path}df.gz")
-    positions.to_pickle(f"{path}pos.gz")
+    #print("Pickling")
+    #df.to_pickle(f"{path}df.gz")
     
-    return df, positions
+    print("Done")
+    
+    return df
     
 
 if __name__ == '__main__':
