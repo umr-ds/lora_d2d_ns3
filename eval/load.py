@@ -1,11 +1,12 @@
 import glob
 import os
+import sys
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
 
 def get_positions(path, seed):
-    print("Getting positions")
     position_lines = []
     positions = {}
     
@@ -21,23 +22,36 @@ def get_positions(path, seed):
             y_val = y.split('=')[1].strip(',')
             addr_val = addr.split('=')[1].strip()
             
-            positions[addr_val] = (int(x_val), int(y_val))
+            positions[float(addr_val)] = (int(x_val), int(y_val))
           
     return positions, position_lines
 
-def load_file(path):
-    print(f"Loading {path}")
+def get_distance(xpos_sender, ypos_sender, xpos_recv, ypos_recv):
+    x_delta = xpos_sender - xpos_recv
+    y_delta = ypos_sender - ypos_recv
     
+    return np.sqrt(x_delta**2 + y_delta**2)
+
+def load_file(path, log_file):
     basename = os.path.basename(path)
     filename = os.path.splitext(basename)[0]
-    
-    print("Setting config params")
+    print(f"{datetime.now()} - Loading {filename}", file=log_file, flush=True)
     nodes, area, freq, bps, sps, bw, payload, msg_per_node, seed = filename.split('_')
     
+    print(f"{datetime.now()} - Getting positions", file=log_file, flush=True)
     positions, position_lines = get_positions(path, seed)
     
+    print(f"{datetime.now()} - Reading CSV", file=log_file, flush=True)
     df = pd.read_csv(path, skiprows=position_lines)
     
+    print(f"{datetime.now()} - Getting sender IDs", file=log_file, flush=True)
+    sender_id_dict = {}
+    for index, row in df[df["Event"] == "TX"].iterrows():
+        sender_id_dict[row["Packet ID"]] = row["Sender ID"]
+    
+    df.loc[df["Event"] == "RX", "Sender ID"] = df[df["Event"] == "RX"]["Packet ID"].apply(lambda x: sender_id_dict[x])
+    
+    print(f"{datetime.now()} - Setting config params", file=log_file, flush=True)
     df["Nodes"]         = int(nodes)
     df["Area"]          = int(area)
     df["Frequency"]     = int(freq)
@@ -48,26 +62,54 @@ def load_file(path):
     df["Messages/Node"] = int(msg_per_node)
     df["Seed"]          = int(seed)
     
-    df.loc[(df["Symbols/s"] == 61) & (df["Bits/s"] == 292) & (df["Payload"] == 50), "Mode"] = "SF12/125kHz/50B"
-    df.loc[(df["Symbols/s"] == 977) & (df["Bits/s"] == 5468) & (df["Payload"] == 240), "Mode"] = "SF7/125kHz/240B"
-    df.loc[(df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 240), "Mode"] = "SF7/250kHz/240B"
+    print(f"{datetime.now()} - Converting simulation time", file=log_file, flush=True)
+    df['Simulation Time'] = pd.to_timedelta(df["Simulation Time"].map(lambda x: float(x.lstrip('+').rstrip('ns'))), unit="ns")
     
-    x_pos_sender = []
-    y_pos_sender = []
-    x_pos_receiver = []
-    y_pos_receiver = []
-    for _, data in df.iterrows():
-        xpos, ypos = positions[data["Sender Address"]]
-        x_pos_sender.append(xpos)
-        y_pos_sender.append(ypos)
-        xpos, ypos = positions.get(data["Receiver Address"], (np.NaN, np.NaN))
-        x_pos_receiver.append(xpos)
-        y_pos_receiver.append(ypos)
-        
-    df["Sender Position X"] = x_pos_sender
-    df["Sender Position Y"] = y_pos_sender
-    df["Receiver Position X"] = x_pos_receiver
-    df["Receiver Position Y"] = y_pos_receiver
+    print(f"{datetime.now()} - Setting modes", file=log_file, flush=True)
+    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 61)   & (df["Bits/s"] == 292)   & (df["Payload"] == 50),  "Mode"] = "SF12, 125kHz, 292B/s,   50B"
+    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 977)  & (df["Bits/s"] == 5468)  & (df["Payload"] == 50),  "Mode"] = "SF7,  125kHz, 5468B/s,  50B"
+    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 977)  & (df["Bits/s"] == 5468)  & (df["Payload"] == 240), "Mode"] = "SF7,  125kHz, 5468B/s,  240B"
+    df.loc[(df["Bandwidth"] == 250) & (df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 50),  "Mode"] = "SF7,  250kHz, 10937B/s, 50B"
+    df.loc[(df["Bandwidth"] == 250) & (df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 240), "Mode"] = "SF7,  250kHz, 10937B/s, 240B"
+    
+    print(f"{datetime.now()} - Setting position parameters", file=log_file, flush=True)        
+    df["Sender Position X"] = df["Sender ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[0])
+    df["Sender Position Y"] = df["Sender ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[1])
+    df["Receiver Position X"] = df["Receiver ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[0])
+    df["Receiver Position Y"] = df["Receiver ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[1])
+    
+    print(f"{datetime.now()} - Processing distances", file=log_file, flush=True)
+    df['Distance'] = get_distance(df["Sender Position X"], df["Sender Position Y"], df["Receiver Position X"], df["Receiver Position Y"])
+    df['Distance Labels'] = pd.cut(
+        x=df['Distance'],
+        bins=[
+            0,
+            500,
+            1000,
+            1500,
+            2000,
+            2500,
+            3000,
+            3500,
+            4000,
+            4500,
+            5000,
+            10000
+        ],
+        labels=[
+            "<500",
+            "500-1000",
+            "1000-1500",
+            "1500-2000",
+            "2000-2500",
+            "2500-3000",
+            "3000-3500",
+            "3500-4000",
+            "4000-4500",
+            "4500-5000",
+            ">5000"
+        ]
+    )
         
     return df
     
@@ -107,19 +149,22 @@ def load_data(path, param_filter={}):
     else:
         msg_per_node = "*"
         
+    log_file = open("log.txt", "w")
+        
     filter_str = f"{nodes}_{area}_{freq}_{bps}_{sps}_{bw}_{payload}_{msg_per_node}_*"
           
     all_files = glob.glob(f"{path}{filter_str}.log")
 
-    dfs = [load_file(p) for p in all_files]
+    dfs = [load_file(p, log_file) for p in all_files]
     
-    print("Building giganonormous df")
+    print(f"{datetime.now()} - Building gigantonormous df", file=log_file, flush=True)
     df = pd.concat(dfs)
     
-    #print("Pickling")
+    print(f"{datetime.now()} - Pickling", file=log_file, flush=True)
     #df.to_pickle(f"{path}df.gz")
     
-    print("Done")
+    print(f"{datetime.now()} - Done", file=log_file, flush=True)
+    log_file.close()
     
     return df
     

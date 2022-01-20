@@ -1,219 +1,39 @@
-Mon Jan 10 14:22:27 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_10937_1954_250_240_3.log
-Mon Jan 10 14:22:27 2022 - Loading positions
-Mon Jan 10 14:22:32 2022 - Reading CSV
-Mon Jan 10 14:22:41 2022 - Setting Configurations
-Mon Jan 10 14:22:41 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_10937_1954_250_240_3.log
-Mon Jan 10 14:22:41 2022 - Loading positions
-Mon Jan 10 14:23:53 2022 - Reading CSV
-Mon Jan 10 14:26:40 2022 - Setting Configurations
-Mon Jan 10 14:26:41 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_292_61_125_50_50.log
-Mon Jan 10 14:26:41 2022 - Loading positions
-Mon Jan 10 14:26:43 2022 - Reading CSV
-Mon Jan 10 14:26:45 2022 - Setting Configurations
-Mon Jan 10 14:26:45 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_10937_1954_250_240_10.log
-Mon Jan 10 14:26:45 2022 - Loading positions
-Mon Jan 10 14:29:23 2022 - Reading CSV
-Mon Jan 10 14:36:17 2022 - Setting Configurations
-Mon Jan 10 14:36:19 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_292_61_125_50_10.log
-Mon Jan 10 14:36:19 2022 - Loading positions
-Mon Jan 10 14:36:20 2022 - Reading CSV
-Mon Jan 10 14:36:21 2022 - Setting Configurations
-Mon Jan 10 14:36:21 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_10937_1954_250_240_50.log
-Mon Jan 10 14:36:21 2022 - Loading positions
-Mon Jan 10 14:39:00 2022 - Reading CSV
-Mon Jan 10 14:46:05 2022 - Setting Configurations
-Mon Jan 10 14:46:07 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_292_61_125_50_3.log
-Mon Jan 10 14:46:07 2022 - Loading positions
-Mon Jan 10 14:46:18 2022 - Reading CSV
-Mon Jan 10 14:46:37 2022 - Setting Configurations
-Mon Jan 10 14:46:37 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_10937_1954_250_240_10.log
-Mon Jan 10 14:46:37 2022 - Loading positions
-Mon Jan 10 14:46:40 2022 - Reading CSV
-Mon Jan 10 14:46:44 2022 - Setting Configurations
-Mon Jan 10 14:46:44 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_5468_977_125_240_10.log
-Mon Jan 10 14:46:44 2022 - Loading positions
-Mon Jan 10 14:46:46 2022 - Reading CSV
-Mon Jan 10 14:46:51 2022 - Setting Configurations
-Mon Jan 10 14:46:51 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_292_61_125_50_10.log
-Mon Jan 10 14:46:51 2022 - Loading positions
-Mon Jan 10 14:46:52 2022 - Reading CSV
-Mon Jan 10 14:46:55 2022 - Setting Configurations
-Mon Jan 10 14:46:55 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_10937_1954_250_240_50.log
-Mon Jan 10 14:46:55 2022 - Loading positions
-Mon Jan 10 14:48:28 2022 - Reading CSV
-Mon Jan 10 14:52:21 2022 - Setting Configurations
-Mon Jan 10 14:52:23 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_10937_1954_250_240_3.log
-Mon Jan 10 14:52:23 2022 - Loading positions
-Mon Jan 10 14:52:23 2022 - Reading CSV
-Mon Jan 10 14:52:23 2022 - Setting Configurations
-Mon Jan 10 14:52:23 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_10937_1954_250_240_50.log
-Mon Jan 10 14:52:23 2022 - Loading positions
-Mon Jan 10 14:52:34 2022 - Reading CSV
-Mon Jan 10 14:52:53 2022 - Setting Configurations
-Mon Jan 10 14:52:53 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_292_61_125_50_50.log
-Mon Jan 10 14:52:53 2022 - Loading positions
-Mon Jan 10 14:52:55 2022 - Reading CSV
-Mon Jan 10 14:52:58 2022 - Setting Configurations
-Mon Jan 10 14:52:58 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_10937_1954_250_240_10.log
-Mon Jan 10 14:52:58 2022 - Loading positions
-Mon Jan 10 14:53:51 2022 - Reading CSV
-Mon Jan 10 14:55:52 2022 - Setting Configurations
-Mon Jan 10 14:55:52 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_5468_977_125_240_50.log
-Mon Jan 10 14:55:52 2022 - Loading positions
-Mon Jan 10 14:56:00 2022 - Reading CSV
-Mon Jan 10 14:56:15 2022 - Setting Configurations
-Mon Jan 10 14:56:15 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_10937_1954_250_240_10.log
-Mon Jan 10 14:56:15 2022 - Loading positions
-Mon Jan 10 14:56:15 2022 - Reading CSV
-Mon Jan 10 14:56:16 2022 - Setting Configurations
-Mon Jan 10 14:56:16 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_292_61_125_50_50.log
-Mon Jan 10 14:56:16 2022 - Loading positions
-Mon Jan 10 14:56:26 2022 - Reading CSV
-Mon Jan 10 14:56:44 2022 - Setting Configurations
-Mon Jan 10 14:56:45 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_10937_1954_250_240_3.log
-Mon Jan 10 14:56:45 2022 - Loading positions
-Mon Jan 10 14:56:45 2022 - Reading CSV
-Mon Jan 10 14:56:47 2022 - Setting Configurations
-Mon Jan 10 14:56:47 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_292_61_125_50_10.log
-Mon Jan 10 14:56:47 2022 - Loading positions
-Mon Jan 10 14:57:08 2022 - Reading CSV
-Mon Jan 10 14:57:48 2022 - Setting Configurations
-Mon Jan 10 14:57:49 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_5468_977_125_240_3.log
-Mon Jan 10 14:57:49 2022 - Loading positions
-Mon Jan 10 14:58:10 2022 - Reading CSV
-Mon Jan 10 14:58:50 2022 - Setting Configurations
-Mon Jan 10 14:58:50 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_10937_1954_250_240_50.log
-Mon Jan 10 14:58:50 2022 - Loading positions
-Mon Jan 10 14:59:47 2022 - Reading CSV
-Mon Jan 10 15:01:59 2022 - Setting Configurations
-Mon Jan 10 15:02:00 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_10937_1954_250_240_50.log
-Mon Jan 10 15:02:00 2022 - Loading positions
-Mon Jan 10 15:02:03 2022 - Reading CSV
-Mon Jan 10 15:02:08 2022 - Setting Configurations
-Mon Jan 10 15:02:09 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_292_61_125_50_10.log
-Mon Jan 10 15:02:09 2022 - Loading positions
-Mon Jan 10 15:02:18 2022 - Reading CSV
-Mon Jan 10 15:02:34 2022 - Setting Configurations
-Mon Jan 10 15:02:34 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_10937_1954_250_240_10.log
-Mon Jan 10 15:02:34 2022 - Loading positions
-Mon Jan 10 15:02:51 2022 - Reading CSV
-Mon Jan 10 15:03:23 2022 - Setting Configurations
-Mon Jan 10 15:03:23 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_5468_977_125_240_3.log
-Mon Jan 10 15:03:23 2022 - Loading positions
-Mon Jan 10 15:04:25 2022 - Reading CSV
-Mon Jan 10 15:06:46 2022 - Setting Configurations
-Mon Jan 10 15:06:47 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_292_61_125_50_50.log
-Mon Jan 10 15:06:47 2022 - Loading positions
-Mon Jan 10 15:07:06 2022 - Reading CSV
-Mon Jan 10 15:07:41 2022 - Setting Configurations
-Mon Jan 10 15:07:41 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_292_61_125_50_50.log
-Mon Jan 10 15:07:41 2022 - Loading positions
-Mon Jan 10 15:07:52 2022 - Reading CSV
-Mon Jan 10 15:08:13 2022 - Setting Configurations
-Mon Jan 10 15:08:13 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_292_61_125_50_3.log
-Mon Jan 10 15:08:13 2022 - Loading positions
-Mon Jan 10 15:08:36 2022 - Reading CSV
-Mon Jan 10 15:09:21 2022 - Setting Configurations
-Mon Jan 10 15:09:22 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_10937_1954_250_240_10.log
-Mon Jan 10 15:09:22 2022 - Loading positions
-Mon Jan 10 15:10:23 2022 - Reading CSV
-Mon Jan 10 15:12:43 2022 - Setting Configurations
-Mon Jan 10 15:12:44 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_292_61_125_50_3.log
-Mon Jan 10 15:12:44 2022 - Loading positions
-Mon Jan 10 15:12:44 2022 - Reading CSV
-Mon Jan 10 15:12:45 2022 - Setting Configurations
-Mon Jan 10 15:12:45 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_5468_977_125_240_10.log
-Mon Jan 10 15:12:45 2022 - Loading positions
-Mon Jan 10 15:14:21 2022 - Reading CSV
-Mon Jan 10 15:18:26 2022 - Setting Configurations
-Mon Jan 10 15:18:27 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_292_61_125_50_10.log
-Mon Jan 10 15:18:27 2022 - Loading positions
-Mon Jan 10 15:18:37 2022 - Reading CSV
-Mon Jan 10 15:18:56 2022 - Setting Configurations
-Mon Jan 10 15:18:56 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_5468_977_125_240_3.log
-Mon Jan 10 15:18:56 2022 - Loading positions
-Mon Jan 10 15:18:57 2022 - Reading CSV
-Mon Jan 10 15:18:59 2022 - Setting Configurations
-Mon Jan 10 15:18:59 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_5468_977_125_240_10.log
-Mon Jan 10 15:18:59 2022 - Loading positions
-Mon Jan 10 15:19:39 2022 - Reading CSV
-Mon Jan 10 15:21:05 2022 - Setting Configurations
-Mon Jan 10 15:21:06 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_10937_1954_250_240_50.log
-Mon Jan 10 15:21:06 2022 - Loading positions
-Mon Jan 10 15:23:41 2022 - Reading CSV
-Mon Jan 10 15:30:55 2022 - Setting Configurations
-Mon Jan 10 15:30:57 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_10937_1954_250_240_3.log
-Mon Jan 10 15:30:57 2022 - Loading positions
-Mon Jan 10 15:31:17 2022 - Reading CSV
-Mon Jan 10 15:31:56 2022 - Setting Configurations
-Mon Jan 10 15:31:56 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_10937_1954_250_240_3.log
-Mon Jan 10 15:31:56 2022 - Loading positions
-Mon Jan 10 15:32:17 2022 - Reading CSV
-Mon Jan 10 15:32:58 2022 - Setting Configurations
-Mon Jan 10 15:32:59 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_292_61_125_50_10.log
-Mon Jan 10 15:32:59 2022 - Loading positions
-Mon Jan 10 15:33:16 2022 - Reading CSV
-Mon Jan 10 15:33:48 2022 - Setting Configurations
-Mon Jan 10 15:33:48 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_5468_977_125_240_50.log
-Mon Jan 10 15:33:48 2022 - Loading positions
-Mon Jan 10 15:34:28 2022 - Reading CSV
-Mon Jan 10 15:35:55 2022 - Setting Configurations
-Mon Jan 10 15:35:56 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_292_61_125_50_50.log
-Mon Jan 10 15:35:56 2022 - Loading positions
-Mon Jan 10 15:36:03 2022 - Reading CSV
-Mon Jan 10 15:36:16 2022 - Setting Configurations
-Mon Jan 10 15:36:16 2022 - ############# ../results/2022-01-04_143612/1000_5000_433000_5468_977_125_240_50.log
-Mon Jan 10 15:36:16 2022 - Loading positions
-Mon Jan 10 15:37:22 2022 - Reading CSV
-Mon Jan 10 15:39:57 2022 - Setting Configurations
-Mon Jan 10 15:39:58 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_5468_977_125_240_3.log
-Mon Jan 10 15:39:58 2022 - Loading positions
-Mon Jan 10 15:39:58 2022 - Reading CSV
-Mon Jan 10 15:39:59 2022 - Setting Configurations
-Mon Jan 10 15:39:59 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_292_61_125_50_3.log
-Mon Jan 10 15:39:59 2022 - Loading positions
-Mon Jan 10 15:40:13 2022 - Reading CSV
-Mon Jan 10 15:40:41 2022 - Setting Configurations
-Mon Jan 10 15:40:41 2022 - ############# ../results/2022-01-04_143612/100_5000_433000_292_61_125_50_3.log
-Mon Jan 10 15:40:41 2022 - Loading positions
-Mon Jan 10 15:40:42 2022 - Reading CSV
-Mon Jan 10 15:40:43 2022 - Setting Configurations
-Mon Jan 10 15:40:43 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_5468_977_125_240_10.log
-Mon Jan 10 15:40:43 2022 - Loading positions
-Mon Jan 10 15:40:59 2022 - Reading CSV
-Mon Jan 10 15:41:30 2022 - Setting Configurations
-Mon Jan 10 15:41:30 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_5468_977_125_240_10.log
-Mon Jan 10 15:41:30 2022 - Loading positions
-Mon Jan 10 15:42:24 2022 - Reading CSV
-Mon Jan 10 15:44:26 2022 - Setting Configurations
-Mon Jan 10 15:44:26 2022 - ############# ../results/2022-01-04_143612/1000_5000_868000_5468_977_125_240_50.log
-Mon Jan 10 15:44:26 2022 - Loading positions
-Mon Jan 10 15:45:52 2022 - Reading CSV
-Mon Jan 10 15:49:25 2022 - Setting Configurations
-Mon Jan 10 15:49:27 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_5468_977_125_240_50.log
-Mon Jan 10 15:49:27 2022 - Loading positions
-Mon Jan 10 15:50:07 2022 - Reading CSV
-Mon Jan 10 15:51:32 2022 - Setting Configurations
-Mon Jan 10 15:51:33 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_5468_977_125_240_3.log
-Mon Jan 10 15:51:33 2022 - Loading positions
-Mon Jan 10 15:51:38 2022 - Reading CSV
-Mon Jan 10 15:51:48 2022 - Setting Configurations
-Mon Jan 10 15:51:48 2022 - ############# ../results/2022-01-04_143612/500_5000_433000_5468_977_125_240_3.log
-Mon Jan 10 15:51:48 2022 - Loading positions
-Mon Jan 10 15:52:06 2022 - Reading CSV
-Mon Jan 10 15:52:42 2022 - Setting Configurations
-Mon Jan 10 15:52:43 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_5468_977_125_240_10.log
-Mon Jan 10 15:52:43 2022 - Loading positions
-Mon Jan 10 15:52:43 2022 - Reading CSV
-Mon Jan 10 15:52:44 2022 - Setting Configurations
-Mon Jan 10 15:52:44 2022 - ############# ../results/2022-01-04_143612/500_5000_868000_292_61_125_50_3.log
-Mon Jan 10 15:52:44 2022 - Loading positions
-Mon Jan 10 15:52:49 2022 - Reading CSV
-Mon Jan 10 15:52:57 2022 - Setting Configurations
-Mon Jan 10 15:52:57 2022 - ############# ../results/2022-01-04_143612/100_5000_868000_5468_977_125_240_50.log
-Mon Jan 10 15:52:57 2022 - Loading positions
-Mon Jan 10 15:53:00 2022 - Reading CSV
-Mon Jan 10 15:53:05 2022 - Setting Configurations
-Mon Jan 10 15:53:05 2022 - Building gigantonormous dfs
-Mon Jan 10 15:53:52 2022 - Pickling
-Mon Jan 10 18:56:43 2022 - Done
+2022-01-20 13:19:02.428780 - Loading 100_10000_10000_5468_977_125_50_3_35039
+2022-01-20 13:19:02.428830 - Getting positions
+2022-01-20 13:19:02.435898 - Reading CSV
+2022-01-20 13:19:02.452462 - Getting sender IDs
+2022-01-20 13:19:02.475891 - Setting config params
+2022-01-20 13:19:02.477697 - Converting simulation time
+2022-01-20 13:19:02.489514 - Setting modes
+2022-01-20 13:19:02.496026 - Setting position parameters
+2022-01-20 13:19:02.544460 - Processing distances
+2022-01-20 13:19:02.546685 - Loading 100_10000_868000000_5468_977_125_50_3_35039
+2022-01-20 13:19:02.546704 - Getting positions
+2022-01-20 13:19:02.548001 - Reading CSV
+2022-01-20 13:19:02.549351 - Getting sender IDs
+2022-01-20 13:19:02.561874 - Setting config params
+2022-01-20 13:19:02.563479 - Converting simulation time
+2022-01-20 13:19:02.563984 - Setting modes
+2022-01-20 13:19:02.568274 - Setting position parameters
+2022-01-20 13:19:02.570052 - Processing distances
+2022-01-20 13:19:02.571576 - Loading 100_10000_868_5468_977_125_50_3_35039
+2022-01-20 13:19:02.571594 - Getting positions
+2022-01-20 13:19:02.576230 - Reading CSV
+2022-01-20 13:19:02.591773 - Getting sender IDs
+2022-01-20 13:19:02.614529 - Setting config params
+2022-01-20 13:19:02.616297 - Converting simulation time
+2022-01-20 13:19:02.628253 - Setting modes
+2022-01-20 13:19:02.634777 - Setting position parameters
+2022-01-20 13:19:02.682973 - Processing distances
+2022-01-20 13:19:02.685174 - Loading 100_10000_868000_5468_977_125_50_3_35039
+2022-01-20 13:19:02.685194 - Getting positions
+2022-01-20 13:19:02.686534 - Reading CSV
+2022-01-20 13:19:02.688215 - Getting sender IDs
+2022-01-20 13:19:02.700834 - Setting config params
+2022-01-20 13:19:02.702432 - Converting simulation time
+2022-01-20 13:19:02.703084 - Setting modes
+2022-01-20 13:19:02.707245 - Setting position parameters
+2022-01-20 13:19:02.709671 - Processing distances
+2022-01-20 13:19:02.711218 - Building gigantonormous df
+2022-01-20 13:19:02.716367 - Pickling
+2022-01-20 13:19:02.716460 - Done

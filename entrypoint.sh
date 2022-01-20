@@ -22,6 +22,8 @@ if [ -n "$RUN" ]; then
     END=$(( 35039 + RUNS - 1))
     echo "Will repeat $RUNS runs (from 35039 to $END)"
 
+    ./waf --run="lora_d2d"
+
     for nodes in "${NODES[@]}"; do
         for area in "${AREA[@]}"; do
             for freq in "${FREQ[@]}"; do
@@ -43,7 +45,7 @@ if [ -n "$RUN" ]; then
 				fi
 
 				echo "# Starting $name"
-				cmd="./waf --run=\"lora_d2d
+				cmd="./waf --run-no-build=\"lora_d2d
 				    --nodes=${nodes}
 				    --area=${area}
 				    --freq=${freq}

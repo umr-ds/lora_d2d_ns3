@@ -40,10 +40,10 @@ uint16_t seed;                                   // Seed for random number gener
 Ptr<NormalRandomVariable> randomAreaDistributio; // Random number generator
 
 void LoRaD2DLog(std::string event = "",
-                Address receiver = Address(),
+                std::string receiver = "",
                 uint32_t packetSize = 0,
                 uint64_t packetID = 0,
-                Address sender = Address(),
+                std::string sender = "",
                 bool sendSuccess = false)
 {
 
@@ -96,7 +96,7 @@ void Configure(int argc, char **argv)
 
     randomAreaDistributio = CreateObject<NormalRandomVariable>();
     randomAreaDistributio->SetAttribute("Mean", DoubleValue(area / 2));
-    randomAreaDistributio->SetAttribute("Variance", DoubleValue(20 * area));
+    randomAreaDistributio->SetAttribute("Variance", DoubleValue(200 * area));
 }
 
 bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
@@ -105,10 +105,10 @@ bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Ad
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("RX",
-               dev->GetAddress(),
+               std::to_string(dev->GetNode()->GetId()),
                packetSize,
                packetID,
-               sender,
+               "",
                false);
 
     return true;
@@ -123,10 +123,10 @@ void TxPacket(Ptr<LoraNetDevice> dev, uint32_t mode)
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("TX",
-               Address(),
+               "",
                packetSize,
                packetID,
-               dev->GetAddress(),
+               std::to_string(dev->GetNode()->GetId()),
                success);
 }
 
@@ -168,8 +168,8 @@ Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan, ObjectFactory p
     std::ostringstream msg;
     msg << "Position: X="
         << pos.x << ", Y="
-        << pos.y << ", Address="
-        << dev->GetAddress();
+        << pos.y << ", ID="
+        << dev->GetNode()->GetId();
 
     NS_LOG_INFO(msg.str());
 
@@ -235,7 +235,6 @@ void Simulate()
     Simulator::Stop(Seconds(totalSimulationTime + 10));
     Simulator::Run();
     Simulator::Destroy();
-
 }
 
 int main(int argc, char **argv)
@@ -244,10 +243,10 @@ int main(int argc, char **argv)
 
     NS_LOG_INFO("Simulation Time,"
                 << "Event,"
-                << "Receiver Address,"
+                << "Receiver ID,"
                 << "Packet Size,"
                 << "Packet ID,"
-                << "Sender Address,"
+                << "Sender ID,"
                 << "Send Success State,"
                 << "Current Seed");
 
