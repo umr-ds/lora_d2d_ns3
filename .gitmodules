@@ -1,3 +1,0 @@
-[submodule "lora"]
-	path = lora
-	url = git@github.com:umr-ds/lora-ns3-module.git
