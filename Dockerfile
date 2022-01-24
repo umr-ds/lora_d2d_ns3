@@ -44,7 +44,7 @@ ARG NS3_VERSION=3.35
 RUN wget http://www.nsnam.org/release/ns-allinone-$NS3_VERSION.tar.bz2 \
     && tar -xf ns-allinone-$NS3_VERSION.tar.bz2
 
-COPY ./lora /root/ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/src/lora/
+COPY ./lorawan /root/ns-allinone-$NS3_VERSION/ns-$NS3_VERSION/src/lorawan/
 
 RUN cd ns-allinone-$NS3_VERSION \
     && ./build.py --disable-netanim --enable-examples --enable-tests --build-option -v \

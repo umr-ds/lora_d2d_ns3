@@ -1,3 +1,3 @@
 [submodule "lorawan"]
 	path = lorawan
-	url = https://github.com/signetlabdei/lorawan
+	url = git@github.com:umr-ds/lorawan.git

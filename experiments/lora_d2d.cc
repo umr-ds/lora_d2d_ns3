@@ -1,14 +1,7 @@
-#include "ns3/lora-module.h"
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/mobility-module.h"
-
-#include "ns3/lora-net-device.h"
-#include "ns3/lora-channel.h"
-#include "ns3/lora-phy-gen.h"
-#include "ns3/lora-transducer-hd.h"
-#include "ns3/lora-prop-model-ideal.h"
 #include "ns3/constant-position-mobility-model.h"
 #include "ns3/simulator.h"
 #include "ns3/test.h"
@@ -18,21 +11,36 @@
 #include "ns3/callback.h"
 #include "ns3/nstime.h"
 #include "ns3/log.h"
-#include "ns3/mac-lora-gw.h"
+#include "ns3/lora-helper.h"
+#include "ns3/lora-phy.h"
 
+#include "ns3/end-device-lora-phy.h"
+#include "ns3/command-line.h"
+
+#include "ns3/gateway-lora-phy.h"
+#include "ns3/end-device-lorawan-mac.h"
+#include "ns3/gateway-lorawan-mac.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/node-container.h"
+#include "ns3/position-allocator.h"
+#include "ns3/one-shot-sender-helper.h"
+
+#include <algorithm>
+#include <ctime>
 #include <iostream>
 #include <cmath>
 #include <random>
 
 using namespace ns3;
+using namespace lorawan;
 NS_LOG_COMPONENT_DEFINE("LoRaD2D");
 
 uint32_t nodes;                                  // Number of nodes
 uint32_t area;                                   // Size of the field
 uint32_t freq;                                   // Center frequency in Hz
-uint32_t bps;                                    // Bits per second
-uint32_t sps;                                    // Symbols per second
 uint32_t bw;                                     // Bandwidth in Hz
+uint32_t sf;                                     // Spreading factor
+uint32_t cr;                                     // Coding rate
 uint32_t payloadSize;                            // Size of the payload in bytes
 double totalSimulationTime;                      // Total simulation time in seconds
 uint16_t msgPerNode;                             // How many packets a node should send
@@ -41,23 +49,16 @@ Ptr<NormalRandomVariable> randomAreaDistributio; // Random number generator
 
 void LoRaD2DLog(std::string event = "",
                 std::string receiver = "",
-                uint32_t packetSize = 0,
                 uint64_t packetID = 0,
-                std::string sender = "",
-                bool sendSuccess = false)
+                std::string sender = "")
 {
 
     std::ostringstream msg;
     msg << ns3::Now() << ","
         << event << ","
-
-        // RX/TX Event
         << receiver << ","
-        << packetSize << ","
         << packetID << ","
         << sender << ","
-        << sendSuccess << ","
-
         << RngSeedManager::GetRun();
 
     NS_LOG_INFO(msg.str());
@@ -69,22 +70,22 @@ void Configure(int argc, char **argv)
 
     // Set default values for global variables
     nodes = 50;
-    area = 5000;
-    freq = 433000;
-    bps = 5468;
-    sps = 61;
-    bw = 125;
+    area = 10000;
+    freq = 433;
+    sf = 7;
+    cr = 1;
+    bw = 125000;
     payloadSize = 50;
     totalSimulationTime = 120.0;
-    msgPerNode = 3;
+    msgPerNode = 1;
     seed = 35039;
 
     CommandLine cmd;
     cmd.AddValue("nodes", "Number of nodes.", nodes);
     cmd.AddValue("area", "Size of the field", area);
     cmd.AddValue("freq", "Center frequency in Hz", freq);
-    cmd.AddValue("bps", "Bits per second", bps);
-    cmd.AddValue("sps", "Symbols per second", sps);
+    cmd.AddValue("cr", "Coding rate", cr);
+    cmd.AddValue("sf", "Spreading factor", sf);
     cmd.AddValue("bw", "Bandwidth in Hz", bw);
     cmd.AddValue("payload_size", "Size of the payload in bytes", payloadSize);
     cmd.AddValue("sim_time", "Total simulation time", totalSimulationTime);
@@ -99,35 +100,92 @@ void Configure(int argc, char **argv)
     randomAreaDistributio->SetAttribute("Variance", DoubleValue(200 * area));
 }
 
-bool RxPacket(Ptr<NetDevice> dev, Ptr<const Packet> pkt, uint16_t mode, const Address &sender)
+void RxPacket(Ptr<Packet const> pkt, uint32_t devId)
 {
-    uint32_t packetSize = pkt->GetSize();
+    if (pkt->GetSize() < 50)
+    {
+        return;
+    }
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("RX",
-               std::to_string(dev->GetNode()->GetId()),
-               packetSize,
+               std::to_string(devId),
                packetID,
-               "",
-               false);
-
-    return true;
+               "");
 }
 
-void TxPacket(Ptr<LoraNetDevice> dev, uint32_t mode)
+void WrongStatePacket(Ptr<Packet const> pkt, uint32_t devId)
 {
-    Ptr<Packet> pkt = Create<Packet>(payloadSize);
-    bool success = dev->Send(pkt, dev->GetBroadcast(), mode);
+    if (pkt->GetSize() < 50)
+    {
+        return;
+    }
+    uint64_t packetID = pkt->GetUid();
 
-    uint32_t packetSize = pkt->GetSize();
+    LoRaD2DLog("FW",
+               std::to_string(devId),
+               packetID,
+               "");
+}
+
+void InterferencePacket(Ptr<Packet const> pkt, uint32_t devId)
+{
+    if (pkt->GetSize() < 50)
+    {
+        return;
+    }
+    uint64_t packetID = pkt->GetUid();
+
+    LoRaD2DLog("FI",
+               std::to_string(devId),
+               packetID,
+               "");
+}
+
+void SensitivPacket(Ptr<Packet const> pkt, uint32_t devId)
+{
+    if (pkt->GetSize() < 50)
+    {
+        return;
+    }
+
+    uint64_t packetID = pkt->GetUid();
+
+    LoRaD2DLog("FS",
+               std::to_string(devId),
+               packetID,
+               "");
+}
+
+void LogTxPacket(Ptr<Packet const> pkt, uint32_t devId)
+{
+    if (pkt->GetSize() < 50)
+    {
+        return;
+    }
+
     uint64_t packetID = pkt->GetUid();
 
     LoRaD2DLog("TX",
                "",
-               packetSize,
                packetID,
-               std::to_string(dev->GetNode()->GetId()),
-               success);
+               std::to_string(devId));
+}
+
+void TxPacket(Ptr<LoraNetDevice> dev)
+{
+    Ptr<Packet> pkt = Create<Packet>(payloadSize);
+
+    LoraTxParameters txParams;
+    txParams.sf = sf;
+    txParams.codingRate = cr;
+    txParams.bandwidthHz = bw;
+    txParams.headerDisabled = 0;
+    txParams.nPreamble = 8;
+    txParams.crcEnabled = 0;
+    txParams.lowDataRateOptimizationEnabled = false;
+
+    dev->GetPhy()->Send(pkt, txParams, freq, 14);
 }
 
 std::vector<std::tuple<int, int>> LocationDistribution()
@@ -145,63 +203,54 @@ std::vector<std::tuple<int, int>> LocationDistribution()
     return positions;
 }
 
-Ptr<LoraNetDevice> CreateNode(Vector pos, Ptr<LoraChannel> chan, ObjectFactory phyFac)
+Ptr<LoraNetDevice> CreateNode(Vector pos, LoraPhyHelper phyHelper)
 {
-    Ptr<LoraPhy> phy = phyFac.Create<LoraPhy>();
+
     Ptr<Node> node = CreateObject<Node>();
-    Ptr<LoraNetDevice> dev = CreateObject<LoraNetDevice>();
-    Ptr<MacLoraAca> mac = CreateObject<MacLoraAca>();
+
     Ptr<ConstantPositionMobilityModel> mobility = CreateObject<ConstantPositionMobilityModel>();
-
-    Ptr<LoraTransducerHd> trans = CreateObject<LoraTransducerHd>();
-
     mobility->SetPosition(pos);
     node->AggregateObject(mobility);
-    mac->SetAddress(LoraAddress::Allocate());
 
-    dev->SetPhy(phy);
-    dev->SetMac(mac);
-    dev->SetChannel(chan);
-    dev->SetTransducer(trans);
-    node->AddDevice(dev);
+    Ptr<LoraNetDevice> device = CreateObject<LoraNetDevice>();
+
+    Ptr<LoraPhy> phy = phyHelper.Create(node, device);
+    device->SetPhy(phy);
+    device->GetPhy()->GetObject<EndDeviceLoraPhy>()->SetSpreadingFactor(sf);
+    device->GetPhy()->GetObject<EndDeviceLoraPhy>()->SetFrequency(freq);
+
+    device->GetPhy()->GetObject<EndDeviceLoraPhy>()->SwitchToStandby();
+
+    device->GetPhy()->TraceConnectWithoutContext("StartSending", MakeCallback(LogTxPacket));
+    device->GetPhy()->TraceConnectWithoutContext("RXWrongState", MakeCallback(WrongStatePacket));
+    device->GetPhy()->TraceConnectWithoutContext("ReceivedPacket", MakeCallback(RxPacket));
+    device->GetPhy()->TraceConnectWithoutContext("LostPacketBecauseInterference", MakeCallback(InterferencePacket));
+    device->GetPhy()->TraceConnectWithoutContext("LostPacketBecauseUnderSensitivity", MakeCallback(SensitivPacket));
+
+    node->AddDevice(device);
 
     std::ostringstream msg;
     msg << "Position: X="
         << pos.x << ", Y="
         << pos.y << ", ID="
-        << dev->GetNode()->GetId();
-
+        << device->GetNode()->GetId();
     NS_LOG_INFO(msg.str());
 
-    return dev;
+    return device;
 }
 
 void Simulate()
 {
 
-    LoraModesList modeList;
-    LoraTxMode mode = LoraTxModeFactory::CreateMode(LoraTxMode::LORA,
-                                                    bps,  // Data rate in bps
-                                                    sps,  // PHY rate in SPS
-                                                    freq, // Center frequency
-                                                    bw,   // Bandwidth
-                                                    0,    // Constellation -> Not used here
-                                                    "default_mode");
-    modeList.AppendMode(LoraTxMode(mode));
+    Ptr<LogDistancePropagationLossModel> loss = CreateObject<LogDistancePropagationLossModel>();
+    loss->SetPathLossExponent(3.76);
+    loss->SetReference(1, 7.7);
+    Ptr<PropagationDelayModel> delay = CreateObject<ConstantSpeedPropagationDelayModel>();
+    Ptr<LoraChannel> channel = CreateObject<LoraChannel>(loss, delay);
 
-    Ptr<LoraPhyPerGenDefault> defaultPer = CreateObject<LoraPhyPerGenDefault>();
-    Ptr<LoraPhyCalcSinrDefault> defaultSinr = CreateObject<LoraPhyCalcSinrDefault>();
-
-    ObjectFactory phyFac;
-    phyFac.SetTypeId("ns3::LoraPhyGen");
-    phyFac.Set("PerModel", PointerValue(defaultPer));
-    phyFac.Set("SinrModel", PointerValue(defaultSinr));
-    phyFac.Set("SupportedModes", LoraModesListValue(modeList));
-
-    Ptr<LoraPropModelThorp> prop = CreateObject<LoraPropModelThorp>();
-
-    Ptr<LoraChannel> channel = CreateObject<LoraChannel>();
-    channel->SetAttribute("PropagationModel", PointerValue(prop));
+    LoraPhyHelper phyHelper = LoraPhyHelper();
+    phyHelper.SetChannel(channel);
+    phyHelper.SetDeviceType(LoraPhyHelper::ED);
 
     RngSeedManager::SetRun(seed);
 
@@ -211,8 +260,7 @@ void Simulate()
 
     for (std::tuple<int, int> position : positions)
     {
-        Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), channel, phyFac);
-        dev->SetReceiveCallback(MakeCallback(&RxPacket));
+        Ptr<LoraNetDevice> dev = CreateNode(Vector(std::get<0>(position), std::get<1>(position), 0), phyHelper);
         devices.push_back(dev);
     }
 
@@ -226,9 +274,7 @@ void Simulate()
         for (int i = 0; i < msgPerNode; i++)
         {
             double scheduledTime = simuTimeRandomRange->GetValue();
-            dev->SetChannelMode(0);
-            dev->SetTransmitStartTime(scheduledTime);
-            Simulator::Schedule(Seconds(scheduledTime), &TxPacket, dev, 0);
+            Simulator::Schedule(Seconds(scheduledTime), &TxPacket, dev);
         }
     }
 
@@ -244,10 +290,8 @@ int main(int argc, char **argv)
     NS_LOG_INFO("Simulation Time,"
                 << "Event,"
                 << "Receiver ID,"
-                << "Packet Size,"
                 << "Packet ID,"
                 << "Sender ID,"
-                << "Send Success State,"
                 << "Current Seed");
 
     Simulate();
