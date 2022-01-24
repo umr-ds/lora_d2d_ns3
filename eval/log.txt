@@ -1,39 +1,16 @@
-2022-01-20 13:19:02.428780 - Loading 100_10000_10000_5468_977_125_50_3_35039
-2022-01-20 13:19:02.428830 - Getting positions
-2022-01-20 13:19:02.435898 - Reading CSV
-2022-01-20 13:19:02.452462 - Getting sender IDs
-2022-01-20 13:19:02.475891 - Setting config params
-2022-01-20 13:19:02.477697 - Converting simulation time
-2022-01-20 13:19:02.489514 - Setting modes
-2022-01-20 13:19:02.496026 - Setting position parameters
-2022-01-20 13:19:02.544460 - Processing distances
-2022-01-20 13:19:02.546685 - Loading 100_10000_868000000_5468_977_125_50_3_35039
-2022-01-20 13:19:02.546704 - Getting positions
-2022-01-20 13:19:02.548001 - Reading CSV
-2022-01-20 13:19:02.549351 - Getting sender IDs
-2022-01-20 13:19:02.561874 - Setting config params
-2022-01-20 13:19:02.563479 - Converting simulation time
-2022-01-20 13:19:02.563984 - Setting modes
-2022-01-20 13:19:02.568274 - Setting position parameters
-2022-01-20 13:19:02.570052 - Processing distances
-2022-01-20 13:19:02.571576 - Loading 100_10000_868_5468_977_125_50_3_35039
-2022-01-20 13:19:02.571594 - Getting positions
-2022-01-20 13:19:02.576230 - Reading CSV
-2022-01-20 13:19:02.591773 - Getting sender IDs
-2022-01-20 13:19:02.614529 - Setting config params
-2022-01-20 13:19:02.616297 - Converting simulation time
-2022-01-20 13:19:02.628253 - Setting modes
-2022-01-20 13:19:02.634777 - Setting position parameters
-2022-01-20 13:19:02.682973 - Processing distances
-2022-01-20 13:19:02.685174 - Loading 100_10000_868000_5468_977_125_50_3_35039
-2022-01-20 13:19:02.685194 - Getting positions
-2022-01-20 13:19:02.686534 - Reading CSV
-2022-01-20 13:19:02.688215 - Getting sender IDs
-2022-01-20 13:19:02.700834 - Setting config params
-2022-01-20 13:19:02.702432 - Converting simulation time
-2022-01-20 13:19:02.703084 - Setting modes
-2022-01-20 13:19:02.707245 - Setting position parameters
-2022-01-20 13:19:02.709671 - Processing distances
-2022-01-20 13:19:02.711218 - Building gigantonormous df
-2022-01-20 13:19:02.716367 - Pickling
-2022-01-20 13:19:02.716460 - Done
+2022-01-24 19:27:11.948730 - Loading 100_10000_868_7_1_125000_222_3_35046
+2022-01-24 19:27:11.948765 - Getting positions
+2022-01-24 19:27:11.954432 - Reading CSV
+2022-01-24 19:27:11.964740 - Getting sender IDs
+2022-01-24 19:27:11.987752 - Setting config params
+2022-01-24 19:27:11.989514 - Converting simulation time
+2022-01-24 19:27:12.001100 - Setting modes
+2022-01-24 19:27:12.008109 - Setting position parameters
+2022-01-24 19:27:12.056597 - Processing distances
+2022-01-24 19:27:12.058850 - Loading 100_10000_868_9_1_125000_51_10_35045
+2022-01-24 19:27:12.058862 - Getting positions
+2022-01-24 19:27:12.059180 - Reading CSV
+2022-01-24 19:27:12.060871 - Getting sender IDs
+2022-01-24 19:27:12.061736 - Setting config params
+2022-01-24 19:27:12.063329 - Converting simulation time
+2022-01-24 19:27:12.063723 - Setting modes

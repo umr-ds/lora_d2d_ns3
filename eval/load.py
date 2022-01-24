@@ -6,7 +6,7 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 
-def get_positions(path, seed):
+def get_positions(path):
     position_lines = []
     positions = {}
     
@@ -36,10 +36,9 @@ def load_file(path, log_file):
     basename = os.path.basename(path)
     filename = os.path.splitext(basename)[0]
     print(f"{datetime.now()} - Loading {filename}", file=log_file, flush=True)
-    nodes, area, freq, bps, sps, bw, payload, msg_per_node, seed = filename.split('_')
     
     print(f"{datetime.now()} - Getting positions", file=log_file, flush=True)
-    positions, position_lines = get_positions(path, seed)
+    positions, position_lines = get_positions(path)
     
     print(f"{datetime.now()} - Reading CSV", file=log_file, flush=True)
     df = pd.read_csv(path, skiprows=position_lines)
@@ -49,28 +48,30 @@ def load_file(path, log_file):
     for index, row in df[df["Event"] == "TX"].iterrows():
         sender_id_dict[row["Packet ID"]] = row["Sender ID"]
     
-    df.loc[df["Event"] == "RX", "Sender ID"] = df[df["Event"] == "RX"]["Packet ID"].apply(lambda x: sender_id_dict[x])
+    df.loc[df["Event"] != "TX", "Sender ID"] = df[df["Event"] != "TX"]["Packet ID"].apply(lambda x: sender_id_dict[x])
     
     print(f"{datetime.now()} - Setting config params", file=log_file, flush=True)
-    df["Nodes"]         = int(nodes)
-    df["Area"]          = int(area)
-    df["Frequency"]     = int(freq)
-    df["Bits/s"]        = int(bps)
-    df["Symbols/s"]     = int(sps)
-    df["Bandwidth"]     = int(bw)
-    df["Payload"]       = int(payload)
-    df["Messages/Node"] = int(msg_per_node)
-    df["Seed"]          = int(seed)
+    nodes, area, freq, sf, cr, bw, payload, msg_per_node, seed = filename.split('_')
+    df["Nodes"]            = int(nodes)
+    df["Area"]             = int(area)
+    df["Frequency"]        = int(freq)
+    df["Spreading Factor"] = int(sf)
+    df["Coding Rate"]      = int(cr)
+    df["Bandwidth"]        = int(bw)
+    df["Payload"]          = int(payload)
+    df["Messages/Node"]    = int(msg_per_node)
+    df["Seed"]             = int(seed)
     
     print(f"{datetime.now()} - Converting simulation time", file=log_file, flush=True)
     df['Simulation Time'] = pd.to_timedelta(df["Simulation Time"].map(lambda x: float(x.lstrip('+').rstrip('ns'))), unit="ns")
     
     print(f"{datetime.now()} - Setting modes", file=log_file, flush=True)
-    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 61)   & (df["Bits/s"] == 292)   & (df["Payload"] == 50),  "Mode"] = "SF12, 125kHz, 292B/s,   50B"
-    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 977)  & (df["Bits/s"] == 5468)  & (df["Payload"] == 50),  "Mode"] = "SF7,  125kHz, 5468B/s,  50B"
-    df.loc[(df["Bandwidth"] == 125) & (df["Symbols/s"] == 977)  & (df["Bits/s"] == 5468)  & (df["Payload"] == 240), "Mode"] = "SF7,  125kHz, 5468B/s,  240B"
-    df.loc[(df["Bandwidth"] == 250) & (df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 50),  "Mode"] = "SF7,  250kHz, 10937B/s, 50B"
-    df.loc[(df["Bandwidth"] == 250) & (df["Symbols/s"] == 1954) & (df["Bits/s"] == 10937) & (df["Payload"] == 240), "Mode"] = "SF7,  250kHz, 10937B/s, 240B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 12) & (df["Payload"] == 51),  "Mode"]  = "SF12, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 51),  "Mode"]  = "SF9, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 115),  "Mode"] = "SF9, 125kHz, 115B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 51), "Mode"]   = "SF7, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 125kHz, 222B"
+    df.loc[(df["Bandwidth"] == 250000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 125kHz, 222B"
     
     print(f"{datetime.now()} - Setting position parameters", file=log_file, flush=True)        
     df["Sender Position X"] = df["Sender ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[0])
@@ -114,7 +115,7 @@ def load_file(path, log_file):
     return df
     
 def load_data(path, param_filter={}):
-    nodes = area = freq = bps = sps = bw = payload = msg_per_node = None
+    nodes = area = freq = sf = cr = bw = payload = msg_per_node = None
     
     if 'nodes' in param_filter:
         nodes = param_filter['nodes']
@@ -128,14 +129,14 @@ def load_data(path, param_filter={}):
         freq = param_filter['freq']
     else:
         freq = "*"
-    if 'bps' in param_filter:
-        bps = param_filter['bps']
+    if 'sf' in param_filter:
+        sf = param_filter['sf']
     else:
-        bps = "*"
-    if 'sps' in param_filter:
-        sps = param_filter['sps']
+        sf = "*"
+    if 'cr' in param_filter:
+        cr = param_filter['cr']
     else:
-        sps = "*"
+        cr = "*"
     if 'bw' in param_filter:
         bw = param_filter['bw']
     else:
@@ -149,9 +150,9 @@ def load_data(path, param_filter={}):
     else:
         msg_per_node = "*"
         
-    log_file = open("log.txt", "w")
+    log_file = sys.stdout #open("log.txt", "w")
         
-    filter_str = f"{nodes}_{area}_{freq}_{bps}_{sps}_{bw}_{payload}_{msg_per_node}_*"
+    filter_str = f"{nodes}_{area}_{freq}_{sf}_{cr}_{bw}_{payload}_{msg_per_node}_*"
           
     all_files = glob.glob(f"{path}{filter_str}.log")
 
@@ -164,7 +165,8 @@ def load_data(path, param_filter={}):
     #df.to_pickle(f"{path}df.gz")
     
     print(f"{datetime.now()} - Done", file=log_file, flush=True)
-    log_file.close()
+    print("Done")
+    #log_file.close()
     
     return df
     
