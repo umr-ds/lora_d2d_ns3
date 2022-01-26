@@ -51,12 +51,10 @@ def load_file(path, log_file):
     df.loc[df["Event"] != "TX", "Sender ID"] = df[df["Event"] != "TX"]["Packet ID"].apply(lambda x: sender_id_dict[x])
     
     print(f"{datetime.now()} - Setting config params", file=log_file, flush=True)
-    nodes, area, freq, sf, cr, bw, payload, msg_per_node, seed = filename.split('_')
+    nodes, area, _, sf, _, bw, payload, msg_per_node, seed = filename.split('_')
     df["Nodes"]            = int(nodes)
     df["Area"]             = int(area)
-    df["Frequency"]        = int(freq)
     df["Spreading Factor"] = int(sf)
-    df["Coding Rate"]      = int(cr)
     df["Bandwidth"]        = int(bw)
     df["Payload"]          = int(payload)
     df["Messages/Node"]    = int(msg_per_node)
@@ -66,13 +64,13 @@ def load_file(path, log_file):
     df['Simulation Time'] = pd.to_timedelta(df["Simulation Time"].map(lambda x: float(x.lstrip('+').rstrip('ns'))), unit="ns")
     
     print(f"{datetime.now()} - Setting modes", file=log_file, flush=True)
-    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 12) & (df["Payload"] == 51),  "Mode"]  = "SF12, 125kHz, 51B"
-    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 51),  "Mode"]  = "SF9, 125kHz, 51B"
-    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 115),  "Mode"] = "SF9, 125kHz, 115B"
-    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 51), "Mode"]   = "SF7, 125kHz, 51B"
-    df.loc[(df["Bandwidth"] == 125000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 125kHz, 222B"
-    df.loc[(df["Bandwidth"] == 250000) & (df["Coding Rate"] == 1) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 125kHz, 222B"
-    
+    df.loc[(df["Bandwidth"] == 125000) & (df["Spreading Factor"] == 12) & (df["Payload"] == 51),  "Mode"]  = "SF12, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 51),  "Mode"]  = "SF9, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Spreading Factor"] == 9)  & (df["Payload"] == 115),  "Mode"] = "SF9, 125kHz, 115B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 51), "Mode"]   = "SF7, 125kHz, 51B"
+    df.loc[(df["Bandwidth"] == 125000) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 125kHz, 222B"
+    df.loc[(df["Bandwidth"] == 250000) & (df["Spreading Factor"] == 7)  & (df["Payload"] == 222),  "Mode"] = "SF7, 250kHz, 222B"
+        
     print(f"{datetime.now()} - Setting position parameters", file=log_file, flush=True)        
     df["Sender Position X"] = df["Sender ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[0])
     df["Sender Position Y"] = df["Sender ID"].apply(lambda x: positions.get(x, (np.NaN, np.NaN))[1])
@@ -81,41 +79,11 @@ def load_file(path, log_file):
     
     print(f"{datetime.now()} - Processing distances", file=log_file, flush=True)
     df['Distance'] = get_distance(df["Sender Position X"], df["Sender Position Y"], df["Receiver Position X"], df["Receiver Position Y"])
-    df['Distance Labels'] = pd.cut(
-        x=df['Distance'],
-        bins=[
-            0,
-            500,
-            1000,
-            1500,
-            2000,
-            2500,
-            3000,
-            3500,
-            4000,
-            4500,
-            5000,
-            10000
-        ],
-        labels=[
-            "<500",
-            "500-1000",
-            "1000-1500",
-            "1500-2000",
-            "2000-2500",
-            "2500-3000",
-            "3000-3500",
-            "3500-4000",
-            "4000-4500",
-            "4500-5000",
-            ">5000"
-        ]
-    )
         
     return df
     
 def load_data(path, param_filter={}):
-    nodes = area = freq = sf = cr = bw = payload = msg_per_node = None
+    nodes = area = sf = bw = payload = msg_per_node = None
     
     if 'nodes' in param_filter:
         nodes = param_filter['nodes']
@@ -125,18 +93,10 @@ def load_data(path, param_filter={}):
         area = param_filter['area']
     else:
         area = "*"
-    if 'freq' in param_filter:
-        freq = param_filter['freq']
-    else:
-        freq = "*"
     if 'sf' in param_filter:
         sf = param_filter['sf']
     else:
         sf = "*"
-    if 'cr' in param_filter:
-        cr = param_filter['cr']
-    else:
-        cr = "*"
     if 'bw' in param_filter:
         bw = param_filter['bw']
     else:
@@ -150,25 +110,28 @@ def load_data(path, param_filter={}):
     else:
         msg_per_node = "*"
         
-    log_file = sys.stdout #open("log.txt", "w")
+    log_file = open("log.txt", "w")
         
-    filter_str = f"{nodes}_{area}_{freq}_{sf}_{cr}_{bw}_{payload}_{msg_per_node}_*"
+    filter_str = f"{nodes}_{area}_*_{sf}_*_{bw}_{payload}_{msg_per_node}_*"
           
     all_files = glob.glob(f"{path}{filter_str}.log")
+    
+    ok_runs = ("35039.log", "35040.log", "35041.log", "35042.log", "35043.log")
 
-    dfs = [load_file(p, log_file) for p in all_files]
+    dfs = [load_file(p, log_file) for p in all_files if p.endswith(ok_runs)]
     
     print(f"{datetime.now()} - Building gigantonormous df", file=log_file, flush=True)
     df = pd.concat(dfs)
     
-    print(f"{datetime.now()} - Pickling", file=log_file, flush=True)
-    #df.to_pickle(f"{path}df.gz")
+    # For some plot we want to plot many data points. Thus, we have to use just a sample because the data and the figure get unmanageble
+    sampled_df = df.sample(frac=.05)
+    sampled_df = sampled_df[~sampled_df["Messages/Node"].isin([1, 20, 30, 40, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200])]
     
     print(f"{datetime.now()} - Done", file=log_file, flush=True)
     print("Done")
-    #log_file.close()
+    log_file.close()
     
-    return df
+    return df, sampled_df
     
 
 if __name__ == '__main__':
